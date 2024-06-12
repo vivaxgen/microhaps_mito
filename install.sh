@@ -25,12 +25,12 @@ esac
 
 # Parsing arguments
 if [ -t 0 ] && [ -z "${BASEDIR:-}" ]; then
-  printf "Pipeline base directory? [./pipeline] " # **UPDATE** the pipeline name (if changed)
+  printf "Pipeline base directory? [./microhaps_mito] " # **UPDATE** the pipeline name (if changed)
   read BASEDIR
 fi
 
 # default value
-BASEDIR="${BASEDIR:-./pipeline}" # **UPDATE** the pipeline name (if changed)
+BASEDIR="${BASEDIR:-./microhaps_mito}" # **UPDATE** the pipeline name (if changed)
 
 uMAMBA_ENVNAME='microhaps_mito' # **UPDATE** the pipeline name (if changed)
 OMIT='GATK4'
@@ -40,13 +40,14 @@ source <(curl -L https://raw.githubusercontent.com/vivaxgen/ngs-pipeline/main/in
 #echo Installing apptainer
 #micromamba -y install apptainer -c conda-forge -c bioconda
 #micromamba -y install squashfuse -c conda-forge
-
+pip3 install scikit-learn 
 
 
 echo "Cloning Microhaps-mito pipeline"
 git clone https://github.com/vivaxgen/microhaps_mito.git ${ENVS_DIR}/microhaps_mito # **UPDATE** the pipeline name (if changed)
 
 ln -sr ${ENVS_DIR}/microhaps_mito/bin/update-pipeline.sh ${BASEDIR}/bin/update-pipeline.sh # **UPDATE** the pipeline name (if changed)
+chmod +x ${BASEDIR}/bin/update-pipeline.sh
 
 
 #echo "source \${VVG_BASEDIR}/env/G6PD-pipeline/activate.sh" >> ${BASEDIR}/bin/activate.sh
