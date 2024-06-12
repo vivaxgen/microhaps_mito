@@ -32,7 +32,7 @@ fi
 # default value
 BASEDIR="${BASEDIR:-./pipeline}" # **UPDATE** the pipeline name (if changed)
 
-uMAMBA_ENVNAME='pipeline' # **UPDATE** the pipeline name (if changed)
+uMAMBA_ENVNAME='microhaps_mito' # **UPDATE** the pipeline name (if changed)
 OMIT='GATK4'
 source <(curl -L https://raw.githubusercontent.com/vivaxgen/ngs-pipeline/main/install.sh)
 
@@ -41,22 +41,24 @@ source <(curl -L https://raw.githubusercontent.com/vivaxgen/ngs-pipeline/main/in
 #micromamba -y install apptainer -c conda-forge -c bioconda
 #micromamba -y install squashfuse -c conda-forge
 
-echo "Cloning G6PD pipeline"
-git clone https://github.com/someone/pipeline.git ${ENVS_DIR}/pipeline # **UPDATE** the pipeline name (if changed)
 
-ln -sr ${ENVS_DIR}/pipeline/bin/update-pipeline.sh ${BASEDIR}/bin/update-pipeline.sh # **UPDATE** the pipeline name (if changed)
+
+echo "Cloning Microhaps-mito pipeline"
+git clone https://github.com/vivaxgen/microhaps_mito.git ${ENVS_DIR}/microhaps_mito # **UPDATE** the pipeline name (if changed)
+
+ln -sr ${ENVS_DIR}/microhaps_mito/bin/update-pipeline.sh ${BASEDIR}/bin/update-pipeline.sh # **UPDATE** the pipeline name (if changed)
 
 
 #echo "source \${VVG_BASEDIR}/env/G6PD-pipeline/activate.sh" >> ${BASEDIR}/bin/activate.sh
-ln -sr ${ENVS_DIR}/pipeline/etc/bashrc.d/50-pipeline ${BASHRC_DIR}/  # **UPDATE** the pipeline name (if changed)
+ln -sr ${ENVS_DIR}/microhaps_mito/etc/bashrc.d/50-pipeline ${BASHRC_DIR}/  # **UPDATE** the pipeline name (if changed)
 
 echo "Reloading source files"
 reload_vvg_profiles
 
 
 echo
-echo "Pipeline has been successfully installed." # **UPDATE** the pipeline name (if changed)
-echo "To activate the Pipeline environment, either run the activation script" # **UPDATE** the pipeline name (if changed)
+echo "microhaps_mito has been successfully installed." # **UPDATE** the pipeline name (if changed)
+echo "To activate the microhaps_mito environment, either run the activation script" # **UPDATE** the pipeline name (if changed)
 echo "to get a new shell:"
 echo
 echo "    `realpath ${BINDIR}/activate`"

@@ -5,7 +5,7 @@
 
 export something=something # **UPDATE** the pipeline name (if changed)
 
-PROMPT=pipeline # **UPDATE** the pipeline name (if changed)
+PROMPT=uhaps_mito # **UPDATE** the pipeline name (if changed)
 #NGS_PIPELINE_BASH_SOURCE=${VVG_BASEDIR}/env/ngs-pipeline/bin/activate.sh
 
 # only edit the following lines if you do know what you are doing
@@ -24,7 +24,7 @@ export NGSENV_BASEDIR=${_mydir}
 #. ${NGS_PIPELINE_BASH_SOURCE}
 PATH=${NGSENV_BASEDIR}/bin:${PATH}
 PYTHONPATH=${NGSENV_BASEDIR}:${PYTHONPATH}
-export NGS_PIPELINE_CMD_MODS=g6pd_pipeline.cmds:${NGS_PIPELINE_CMD_MODS}
+export NGS_PIPELINE_CMD_MODS=microhaps_mito.cmds:${NGS_PIPELINE_CMD_MODS}
 
 PS1="(${PROMPT}) [\u@\h \W]\$ "
 

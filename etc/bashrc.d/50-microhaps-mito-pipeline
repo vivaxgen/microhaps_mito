@@ -7,6 +7,6 @@ _mydir="$(dirname $_script)"
 
 export NGSENV_BASEDIR="$(dirname $(dirname $_mydir))"
 export PYTHONPATH=${NGSENV_BASEDIR}:${PYTHONPATH}
-export NGS_PIPELINE_CMD_MODS=pipeline.cmds:${NGS_PIPELINE_CMD_MODS} # **UPDATE** the pipeline name (if changed)
+export NGS_PIPELINE_CMD_MODS=microhaps_mito.cmds:${NGS_PIPELINE_CMD_MODS} # **UPDATE** the pipeline name (if changed)
 
 # EOF
