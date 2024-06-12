@@ -59,7 +59,7 @@ def main(args):
 
         X = filtered_spec_kmerised
 
-        nrc = NearestCentroid(metric = args.d)
+        nrc = NearestCentroid(metric = args.distance)
         nrc.fit(X, y)
         result_model = {"model_type": "Nearest-centroid", "model":nrc, "additional_data": [kmer]}
         with open(args.outfile, "wb") as f:
