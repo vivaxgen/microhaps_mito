@@ -49,17 +49,17 @@ git clone https://github.com/vivaxgen/microhaps_mito.git ${ENVS_DIR}/microhaps_m
 ln -sr ${ENVS_DIR}/microhaps_mito/bin/update-pipeline.sh ${BASEDIR}/bin/update-pipeline.sh # **UPDATE** the pipeline name (if changed)
 chmod +x ${BASEDIR}/bin/update-pipeline.sh
 
-echo "Creating model"
-mkdir -p ${ENVS_DIR}/microhaps_mito/refs/models
-ngs-pl create-model --type nc -o ${ENVS_DIR}/microhaps_mito/refs/models/nc.pickle -b ${ENVS_DIR}/microhaps_mito/refs/Mito_sync_cons05.bed ${ENVS_DIR}/microhaps_mito/refs/ORIGINAL_Spec2-1638-1893.fasta
-ngs-pl create-model --type cnb -o ${ENVS_DIR}/microhaps_mito/refs/models/cnb.pickle -b ${ENVS_DIR}/microhaps_mito/refs/Mito_sync_cons05.bed ${ENVS_DIR}/microhaps_mito/refs/ORIGINAL_Spec2-1638-1893.fasta
-
-
 #echo "source \${VVG_BASEDIR}/env/G6PD-pipeline/activate.sh" >> ${BASEDIR}/bin/activate.sh
 ln -sr ${ENVS_DIR}/microhaps_mito/etc/bashrc.d/50-microhaps-mito-pipeline ${BASHRC_DIR}/  # **UPDATE** the pipeline name (if changed)
 
 echo "Reloading source files"
 reload_vvg_profiles
+
+echo "Creating model"
+mkdir -p ${ENVS_DIR}/microhaps_mito/refs/models
+ngs-pl create-model --type nc -o ${ENVS_DIR}/microhaps_mito/refs/models/nc.pickle -b ${ENVS_DIR}/microhaps_mito/refs/Mito_sync_cons05.bed ${ENVS_DIR}/microhaps_mito/refs/ORIGINAL_Spec2-1638-1893.fasta
+ngs-pl create-model --type cnb -o ${ENVS_DIR}/microhaps_mito/refs/models/cnb.pickle -b ${ENVS_DIR}/microhaps_mito/refs/Mito_sync_cons05.bed ${ENVS_DIR}/microhaps_mito/refs/ORIGINAL_Spec2-1638-1893.fasta
+
 
 
 echo

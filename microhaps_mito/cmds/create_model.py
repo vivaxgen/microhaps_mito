@@ -32,7 +32,7 @@ def main(args):
     from sklearn.naive_bayes import CategoricalNB
     from sklearn.neighbors import NearestCentroid
     from pickle import dump
-    import numpy as np
+
     roi = pd.read_csv(args.bedfile, sep="\t", header=None)
     roi_start = roi.iloc[0,1]# 0-based
     roi_end = roi.iloc[0,2] # 1-based, end is exclusive
