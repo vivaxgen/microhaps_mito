@@ -133,3 +133,5 @@ dmypy.json
 *.fasta
 *.fasta.fai
 *.fasta.ont.mmi
+
+!refs/*.fasta
