@@ -193,8 +193,8 @@ rule infer_species_with_model:
                 if params.model_name == "nc":
                     y_distance = pairwise_distances(X, model.centroids_)
                     sorted_y_distance = np.sort(y_distance, axis=1)
-                    f = (1/sorted_y_distance[:,0])
-                    t = (1/sorted_y_distance[:,1])
+                    f = np.divide(1, sorted_y_distance[:,0], out=np.ones_like(sorted_y_distance[:,0]), where=sorted_y_distance[:,0]!=0)
+                    t = np.divide(1, sorted_y_distance[:,1], out=np.ones_like(sorted_y_distance[:,1]), where=sorted_y_distance[:,1]!=0)
                     f_pair_diff = (2*f)/(f+t) - 1
                     dist_result = {class_name: y_distance[:,class_id] for class_id, class_name in enumerate(model.classes_)}
                     result.update(dist_result)

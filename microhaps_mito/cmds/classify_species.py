@@ -38,7 +38,7 @@ def main(args):
         model=args.model,
         strictness=args.strictness,
     )
-    print(config)
+
     args.snakefile = get_snakefile_path('classify_species.smk',
                                         from_module=microhaps_mito)
 
