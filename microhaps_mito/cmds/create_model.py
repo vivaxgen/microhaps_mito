@@ -69,7 +69,8 @@ def build_consensus_seq(spec, outfile, roi_start=0, roi_end=-1):
     cons = mot.consensus
     with open(outfile, "w") as f:
         f.write(">consensus\n")
-        f.write(cons)
+        f.write(cons.seq)
+        f.write("\n")
 
 
 def main(args):
