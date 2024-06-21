@@ -66,10 +66,11 @@ def build_consensus_seq(spec, outfile, roi_start=0, roi_end=-1):
     roi_end = roi_end if not roi_end == -1 else len(spec[0])
     spec = spec[:, roi_start:roi_end]
     mot = Motif('ACGTN-', spec.alignment)
+    mot.counts["-"] = [0 for _ in range(mot.length)]
     cons = mot.consensus
     with open(outfile, "w") as f:
         f.write(">consensus\n")
-        f.write(cons.seq)
+        f.write(str(cons))
         f.write("\n")
 
 
