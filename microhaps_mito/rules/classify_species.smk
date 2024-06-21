@@ -126,41 +126,21 @@ rule infer_species_with_model:
         sample = lambda w: w.sample,
     run:
         from Bio import AlignIO
-        import numpy as np
-        import pandas as pd
-        from sklearn.metrics import pairwise_distances
         from pickle import load
-        from Bio.Align import PairwiseAligner
 
         sequences = None
         
         if params.model_name == "nc":
-            pickled_dict = load(open(input.nrc_model, "rb"))        
-            model = pickled_dict["model"]
-            kmer = pickled_dict["additional_data"][0]
+            model = load(open(input.nrc_model, "rb"))        
 
         if params.model_name == "cnb":
-            pickled_dict = load(open(input.cnb_model, "rb"))
-            model = pickled_dict["model"]
-            remap_base = pickled_dict["additional_data"][0]
-        
+            model = load(open(input.cnb_model, "rb"))
+
         if params.model_name == "align_score":
-            spec = AlignIO.read(input.fasta_spec, "fasta")
-            species_classes = [seq.id for seq in spec]
-            bed = pd.read_csv(input.bed, sep="\t", header=None)
-            roi_start = bed.iloc[0,1]
-            roi_end = bed.iloc[0,2]
-            filtered_spec = spec[:, roi_start:roi_end]
-        else:
-            species_classes = model.classes_
+            model = load(open(input.pa_model, "rb"))
         
-        def transform_kmer_to_list(sequences, kmers=list()):
-            results = []
-            for sequence in sequences:
-                kmer_count = [sequence.count(kmer) for kmer in kmers]
-                results.append(kmer_count)
-            return results
-        
+        species_classes = model.classes_
+
         try:
             sequences = AlignIO.read(open(input.fasta), "fasta")
         # No read
@@ -173,61 +153,11 @@ rule infer_species_with_model:
             
         if not sequences is None:
             
-            if params.model_name == "cnb" or params.model_name == "nc":
-                if params.model_name == "cnb":
-                    X = np.array([[remap_base[base] for base in seq] for seq in sequences])
-                if params.model_name == "nc":
-                    X = transform_kmer_to_list([seq.upper() for seq in sequences], kmers = kmer)
-                
-                y_pred = model.predict(X)
-                result = {"species": y_pred, "read_id": [seq.id for seq in sequences]}
-
-                if params.model_name == "cnb":
-                    y_pred_proba = model.predict_joint_log_proba(X)
-                    sorted_y_proba = np.sort(y_pred_proba, axis=1)
-                    f_pair_diff = sorted_y_proba[:,-1] - sorted_y_proba[:,-2]
-                    
-                    prob_result = {class_name: y_pred_proba[:,class_id] for class_id, class_name in enumerate(model.classes_)}
-                    result.update(prob_result)
-
-                if params.model_name == "nc":
-                    y_distance = pairwise_distances(X, model.centroids_)
-                    sorted_y_distance = np.sort(y_distance, axis=1)
-                    f = np.divide(1, sorted_y_distance[:,0], out=np.ones_like(sorted_y_distance[:,0]), where=sorted_y_distance[:,0]!=0)
-                    t = np.divide(1, sorted_y_distance[:,1], out=np.ones_like(sorted_y_distance[:,1]), where=sorted_y_distance[:,1]!=0)
-                    f_pair_diff = (2*f)/(f+t) - 1
-                    dist_result = {class_name: y_distance[:,class_id] for class_id, class_name in enumerate(model.classes_)}
-                    result.update(dist_result)
-
-                result["f_pair_diff"] = f_pair_diff
-                result_df = pd.DataFrame.from_dict(result, orient = "columns")
+            if params.model_name == "cnb" or params.model_name == "nc" or params.model_name == "pa":
+                result_df = model.get_full_result(sequences)
                 result_df["sample"] = params.sample
                 result_df.to_csv(output.result, sep="\t", index = False)
             
-            elif params.model_name == "align_score":
-                pa = PairwiseAligner()
-                pa.open_gap_score = -100
-                pa.extend_gap_score = -100
-                pa.mode = "local"
-                pa.match_score = 2
-                pa.mismatch_score = -1
-                score = []
-                for seq in sequences:
-                    score.append(np.array([pa.score(spec_seq, seq.seq.upper()) for spec_seq in filtered_spec]))
-                score = np.array(score)
-                dist_result = {sp_name: score[:,sp_id] for sp_id, sp_name in enumerate(species_classes)}
-                scores_sorted = np.sort(score, axis=1)
-                diff_2_largest = scores_sorted[:,-1] - scores_sorted[:,-2]
-                largest_id = np.argmax(score, axis=1)
-                result = {
-                    "sample": [params.sample]*len(sequences),
-                    "read_id": [seq.id for seq in sequences],
-                    "species": [species_classes[id] for id in largest_id],
-                    "f_pair_diff": diff_2_largest,
-                }
-                result.update(dist_result)
-                result_df = pd.DataFrame.from_dict(result, orient = "columns")
-                result_df.to_csv(output.result, sep="\t", index = False)
             else:
                 raise ValueError("Not a supported model")
 

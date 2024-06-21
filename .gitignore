@@ -135,3 +135,6 @@ dmypy.json
 *.fasta.ont.mmi
 
 !refs/*.fasta
+
+microhaps_mito/cmds/REFS
+*.pkl

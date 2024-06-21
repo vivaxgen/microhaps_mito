@@ -11,7 +11,7 @@ def init_argparser():
     p.add_argument('-u', '--underscore', default=4, type=int,
                    help='number of undercore character to be stripped, '
                    'counted in reverse')
-    p.add_argument('--model', action='append', default = ['*'], choices = ['*', 'cnb', 'nc', 'align_score'],
+    p.add_argument('--model', action='append', default = ['*'], choices = ['*', 'cnb', 'nc', 'pa'],
                     help='model to run (default: *)')
     p.add_argument('--strictness', action='append', default = ['conservative'], choices = ['conservative', 'sensitive'],
                     help='strictness of the filtering (default: conservative)')
@@ -28,7 +28,7 @@ def main(args):
     # smk_basepath = NGSENV_BASEDIR / 'pipeline' / 'rules'
 
     if "*" in args.model:
-        args.model = ['cnb', 'nc', 'align_score']
+        args.model = ['cnb', 'nc', 'pa']
 
     # args.snakefile = smk_basepath / 'index_reference.smk'
     config=dict(
