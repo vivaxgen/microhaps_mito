@@ -72,7 +72,7 @@ def build_consensus_seq(spec, roi_start=0, roi_end=-1):
 def main(args):
     
     def write_to_pickle(obj):
-        with open(args.outfile, "wb") as f:
+        with open(args.outfile, "wb+") as f:
             dump(obj, f)
     
     if args.bedfile:
@@ -124,7 +124,7 @@ def main(args):
     
     if args.type == "cons":
         res = build_consensus_seq(spec, roi_start, roi_end)
-        with open(args.outfile, "w") as f:
+        with open(args.outfile, "w+") as f:
             f.write(res)
         return
 
