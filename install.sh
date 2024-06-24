@@ -61,7 +61,14 @@ ngs-pl create-model --type nc -o ${ENVS_DIR}/microhaps_mito/refs/models/nc.pickl
 ngs-pl create-model --type cnb -o ${ENVS_DIR}/microhaps_mito/refs/models/cnb.pickle -b ${ENVS_DIR}/microhaps_mito/refs/Mito_sync_cons05.bed ${ENVS_DIR}/microhaps_mito/refs/ORIGINAL_Spec2-1638-1893.fasta
 ngs-pl create-model --type pa -o ${ENVS_DIR}/microhaps_mito/refs/models/pa.pickle -b ${ENVS_DIR}/microhaps_mito/refs/Mito_sync_cons05.bed ${ENVS_DIR}/microhaps_mito/refs/ORIGINAL_Spec2-1638-1893.fasta
 ngs-pl create-model --type cons -o ${ENVS_DIR}/microhaps_mito/refs/consensus.fasta -b ${ENVS_DIR}/microhaps_mito/refs/Mito_sync_cons05.bed ${ENVS_DIR}/microhaps_mito/refs/ORIGINAL_Spec2-1638-1893.fasta
+ngs-pl create-model --type ensemble -o ${ENVS_DIR}/microhaps_mito/refs/models/ensemble.fasta -b ${ENVS_DIR}/microhaps_mito/refs/Mito_sync_cons05.bed ${ENVS_DIR}/microhaps_mito/refs/ORIGINAL_Spec2-1638-1893.fasta
 
+ENVS_DIR=ttt_mito/envs/
+ngs-pl create-model --type nc -o ${ENVS_DIR}/microhaps_mito/refs/models/nc.pickle --cascade -m ${ENVS_DIR}/microhaps_mito/refs/mit_filtered_product_muscle_spec.txt ${ENVS_DIR}/microhaps_mito/refs/mit_filtered_product.muscle.fasta
+ngs-pl create-model --type cnb -o ${ENVS_DIR}/microhaps_mito/refs/models/cnb.pickle --cascade -m ${ENVS_DIR}/microhaps_mito/refs/mit_filtered_product_muscle_spec.txt ${ENVS_DIR}/microhaps_mito/refs/mit_filtered_product.muscle.fasta
+ngs-pl create-model --type pa -o ${ENVS_DIR}/microhaps_mito/refs/models/pa.pickle --cascade -m ${ENVS_DIR}/microhaps_mito/refs/mit_filtered_product_muscle_spec.txt ${ENVS_DIR}/microhaps_mito/refs/mit_filtered_product.muscle.fasta
+ngs-pl create-model --type cons -o ${ENVS_DIR}/microhaps_mito/refs/consensus.fasta --cascade ${ENVS_DIR}/microhaps_mito/refs/cons.fasta ${ENVS_DIR}/microhaps_mito/refs/mit_filtered_product.muscle.fasta
+ngs-pl create-model --type ensemble -o ${ENVS_DIR}/microhaps_mito/refs/models/ensemble.fasta --cascade -m ${ENVS_DIR}/microhaps_mito/refs/mit_filtered_product_muscle_spec.txt ${ENVS_DIR}/microhaps_mito/refs/mit_filtered_product.muscle.fasta
 
 echo
 echo "microhaps_mito has been successfully installed." # **UPDATE** the pipeline name (if changed)

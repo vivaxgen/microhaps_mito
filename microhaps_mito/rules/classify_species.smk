@@ -18,6 +18,8 @@ model_to_run = config["model"]
 fasta_spec = NGSENV_BASEDIR + '/' + config["similarity_comparison"]
 cnb_model = NGSENV_BASEDIR + '/' + "refs/models/cnb.pickle"
 nc_model = NGSENV_BASEDIR + '/' + "refs/models/nc.pickle"
+pa_model = NGSENV_BASEDIR + '/' + "refs/models/pa.pickle"
+ensemble_model = NGSENV_BASEDIR + '/' + "refs/models/ensemble.pickle"
 
 from ngs_pipeline import fileutils
 
@@ -80,7 +82,7 @@ rule process_per_sample_result:
         dfs = []
         for file, model_name in zip(input.sample_results, params.models):
             full_model_name = {"cnb": "Categorical_NaiveBayes", "nc": "Nearest_Centroid",
-                "align_score": "Pairwise_consensus_aligner_score"}.get(model_name)
+                "pa": "Pairwise_consensus_aligner_score", 'ensemble':"Ensemble"}.get(model_name)
 
             df = pd.read_csv(file, sep="\t")
             total_read = df.read_id.dropna().count()
@@ -136,8 +138,11 @@ rule infer_species_with_model:
         if params.model_name == "cnb":
             model = load(open(input.cnb_model, "rb"))
 
-        if params.model_name == "align_score":
+        if params.model_name == "pa":
             model = load(open(input.pa_model, "rb"))
+        
+        if params.model_name == "ensemble":
+            model = load(open(input.ensemble_model, "rb"))
         
         species_classes = model.classes_
 
@@ -153,7 +158,7 @@ rule infer_species_with_model:
             
         if not sequences is None:
             
-            if params.model_name == "cnb" or params.model_name == "nc" or params.model_name == "pa":
+            if params.model_name in ["cnb", "nc", "pa", "ensemble"]:
                 result_df = model.get_full_result(sequences)
                 result_df["sample"] = params.sample
                 result_df.to_csv(output.result, sep="\t", index = False)
