@@ -52,6 +52,28 @@ chmod +x ${BASEDIR}/bin/update-pipeline.sh
 #echo "source \${VVG_BASEDIR}/env/G6PD-pipeline/activate.sh" >> ${BASEDIR}/bin/activate.sh
 ln -sr ${ENVS_DIR}/microhaps_mito/etc/bashrc.d/50-microhaps-mito-pipeline ${BASHRC_DIR}/  # **UPDATE** the pipeline name (if changed)
 
+git clone https://github.com/trmznt/seqpy.git ${ENVS_DIR}/seqpy
+ln -sr ${ENVS_DIR}/seqpy/bin/spcli ${BASEDIR}/bin/spcli
+
+mkdir -p ${ENVS_DIR}/seqpy/etc/bashrc.d
+
+cat > ${ENVS_DIR}/seqpy/etc/bashrc.d/20-seqpy << 'EOF'
+_script="$(readlink -f ${BASH_SOURCE[0]})"
+
+# Delete last component from $_script
+_mydir="$(dirname $_script)"
+
+export PYTHONPATH=${PYTHONPATH}:"$(dirname $(dirname $_mydir))"
+EOF
+
+ln -sr ${ENVS_DIR}/seqpy/etc/bashrc.d/20-seqpy ${BASHRC_DIR}/ 
+
+## Wait for update
+curl https://raw.githubusercontent.com/trmznt/pys/master/seq/primersim.py > ${BASEDIR}/opt/primersim.py
+
+pip3 install numba
+micromamba install -y bioconda:muscle==5.1
+
 echo "Reloading source files"
 reload_vvg_profiles
 

@@ -31,7 +31,7 @@ def init_argparser():
                    help='bedfile to specifying region of interest')
 
     p.add_argument('-m', '--meta', default=None, type=str, required = False,
-                   help='metadata file for species label, single column with no header (default: None), same number as defined in fasta file')
+                   help='metadata file for species label, two columns with `fasta_name` and `species` as header (default: None), same number as defined in fasta file')
 
     p.add_argument('-c', '--cascade', default = False, action="store_true", 
                    help=("Whether to cascade the model building process (default: False), submodels will be generated, e.g."

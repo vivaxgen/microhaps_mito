@@ -3,7 +3,7 @@
 
 # edit the following variables as necessary
 
-export something=something # **UPDATE** the pipeline name (if changed)
+# **UPDATE** the pipeline name (if changed)
 
 PROMPT=uhaps_mito # **UPDATE** the pipeline name (if changed)
 #NGS_PIPELINE_BASH_SOURCE=${VVG_BASEDIR}/env/ngs-pipeline/bin/activate.sh
