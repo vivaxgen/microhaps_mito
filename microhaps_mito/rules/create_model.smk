@@ -38,7 +38,7 @@ rule extract_all_hypothetical_products:
         align_seqs = load(input.aligned_mit)
         all_prods = multisequence()
         for seq in align_seqs.seqs:
-            all_prods.append(seq[start:end])
+            all_prods.addseq(seq.label, seq[start:end])
         save(all_prods, output[0])
 
 rule primersim:
