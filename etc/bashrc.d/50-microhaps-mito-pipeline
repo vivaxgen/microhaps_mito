@@ -5,6 +5,7 @@ _script="$(readlink -f ${BASH_SOURCE[0]})"
 # Delete last component from $_script
 _mydir="$(dirname $_script)"
 
+export NGSENV_BASEDIR="$(dirname $(dirname $_mydir))"
 export PYTHONPATH="$(dirname $(dirname $_mydir))":${PYTHONPATH}
 export NGS_PIPELINE_CMD_MODS=microhaps_mito.cmds:${NGS_PIPELINE_CMD_MODS} # **UPDATE** the pipeline name (if changed)
 export OPT=${VVG_BASEDIR}/opt
