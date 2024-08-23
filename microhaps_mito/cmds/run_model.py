@@ -16,7 +16,8 @@ def main(args):
     sequences = AlignIO.read(open(args.infile), "fasta")
     is_cascade = model.get("is_cascade", False)
 
-    result.append(model[0].get_full_result(sequences))
-
+    
     if is_cascade:
         pass
+    else:
+        result.append(model[0].get_full_result(sequences))

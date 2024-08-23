@@ -191,14 +191,19 @@ class MitoEnsemble:
         sorted_scores = np.sort(scores.values, axis=1)
         result["f_pair_diff"] = sorted_scores[:,-1] - sorted_scores[:,-2]
         return pd.DataFrame.from_dict(result, orient = "columns")
-    
+
+# multioutput model  
 class cascadingSpeciationModel:
-    def __init__(self, models):
+    def __init__(self, models, models_n_args = None, roi_start = 0, roi_end = -1):
         self.roi_start = 0
         self.roi_end = -1
         self.spec_min_f_pair_diff = 0
-        self.models = models 
-        # [{"Species": "Plasmodium", "model": XXX, "submodels": [{"Species": "Plasmodium Vivax", "model":}, {}, {}]}]
+        self.models = models
+        self.models = models if models_n_args is None else [model(**args) for model, args in models_n_args]
+        self.classes_ = models[0].classes_ if len(models) > 0 else []
+
+
+    # [{"Species": "Plasmodium", "model": XXX, "submodels": [{"Species": "Plasmodium Vivax", "model":}, {}, {}]}]
     def cascade_fit2(self, X, y = None, modelClass = MitoEnsemble, ):
         if y is None:
             y_name = pd.Series([a.id for a in X])
