@@ -11,7 +11,7 @@ def init_argparser():
     p.add_argument('-u', '--underscore', default=4, type=int,
                    help='number of undercore character to be stripped, '
                    'counted in reverse')
-    p.add_argument('--model', action='append', default = ['*'], choices = ['*', 'cnb', 'nc', 'pa', 'ensemble'],
+    p.add_argument('--model', action='append', default = None, choices = ['all', 'cnb', 'nc', 'pa', 'ensemble'],
                     help='model to run (default: *)')
     p.add_argument('--strictness', action='append', default = ['conservative'], choices = ['conservative', 'sensitive'],
                     help='strictness of the filtering (default: conservative)')
@@ -26,8 +26,7 @@ def main(args):
     # NGSENV_BASEDIR is the base directory of the current pipeline (G6PD)
     # NGSENV_BASEDIR = pathlib.Path(check_NGSENV_BASEDIR())
     # smk_basepath = NGSENV_BASEDIR / 'pipeline' / 'rules'
-
-    if "*" in args.model:
+    if "all" in args.model:
         args.model = ['cnb', 'nc', 'pa', 'ensemble']
 
     # args.snakefile = smk_basepath / 'index_reference.smk'
@@ -48,7 +47,7 @@ def main(args):
     status, elapsed_time = snakeutils.run_snakefile(args, config=config)
 
     if not status:
-        cerr('[WARNING: targeted variant calling did not successfully complete]')
-    cerr(f'[Finish targeted variant calling (time: {elapsed_time})]')
+        cerr('[WARNING: Classifying species did not successfully complete]')
+    cerr(f'[Finish classifying species (time: {elapsed_time})]')
 
 # EOF

@@ -14,12 +14,19 @@ bed_file = NGSENV_BASEDIR + '/' + config['bedfile']
 Reference = NGSENV_BASEDIR + '/' + config["reference"]
 prim_fw = NGSENV_BASEDIR + '/' + config["prim_fw"]
 prim_rv = NGSENV_BASEDIR + '/' + config["prim_rv"]
-model_to_run = config["model"]
+model_to_run = config.get("model", ["cnb", "nc", "pa", "ensemble"])
 fasta_spec = NGSENV_BASEDIR + '/' + config["similarity_comparison"]
-cnb_model = NGSENV_BASEDIR + '/' + "refs/models/cnb.pickle"
-nc_model = NGSENV_BASEDIR + '/' + "refs/models/nc.pickle"
-pa_model = NGSENV_BASEDIR + '/' + "refs/models/pa.pickle"
-ensemble_model = NGSENV_BASEDIR + '/' + "refs/models/ensemble.pickle"
+cnb_model = NGSENV_BASEDIR + '/' + "refs/model/cnb.pickle"
+nc_model = NGSENV_BASEDIR + '/' + "refs/model/nc.pickle"
+pa_model = NGSENV_BASEDIR + '/' + "refs/model/pa.pickle"
+ensemble_model = NGSENV_BASEDIR + '/' + "refs/model/ensemble.pickle"
+
+models_file_loc = {
+    "cnb": cnb_model,
+    "nc": nc_model,
+    "pa": pa_model,
+    "ensemble": ensemble_model
+}
 
 from ngs_pipeline import fileutils
 
@@ -30,23 +37,21 @@ def get_read_file(w):
 
 IDs = read_files.keys()
 
-
-
 rule all:
     input:
         *[f"{outdir}/{sample}/paired_fasta/{sample}.fasta" for sample in IDs],
         *[f"{outdir}/{sample}/{sample}.{model}.tsv" for sample in IDs for model in model_to_run],
-        *[f"{outdir}/{sample}/Report_{sample}.{strictness}.tsv" for sample in IDs for strictness in config['strictness']],
-        f"{outdir}/combined_report.tsv",
+        *[f"{outdir}/{sample}/Report_{sample}_{model}.{strictness}.tsv" for sample in IDs for model in model_to_run for strictness in config['strictness']],
+        *[f"{outdir}/combined_{model}_report.tsv" for model in model_to_run],
 
 
 rule combine_sample_report:
     input:
-        report_files = expand(f"{outdir}/{{sample}}/Report_{{sample}}.{{strictness}}.tsv",
-            sample = IDs,
+        report_files = expand(f"{outdir}/{{sample}}/Report_{{sample}}_{{model}}.{{strictness}}.tsv",
+            sample = IDs, model = model_to_run,
             strictness = config['strictness']),
     output:
-        f"{outdir}/combined_report.tsv"
+        f"{outdir}/combined_{{model}}_report.tsv"
     run:
         import pandas as pd
 
@@ -67,7 +72,7 @@ rule process_per_sample_result:
         sample_results = [f"{outdir}/{{sample}}/{{sample}}.{model}.tsv" for 
             model in model_to_run],
     output:
-        f"{outdir}/{{sample}}/Report_{{sample}}.{{strictness}}.tsv"
+        f"{outdir}/{{sample}}/Report_{{sample}}_{{model}}.{{strictness}}.tsv"
     params:
         filter_thresholds = lambda w: config.get('filtering_criteria').get(w.strictness),
         
@@ -117,122 +122,24 @@ rule process_per_sample_result:
 rule infer_species_with_model:
     input:
         fasta = f"{outdir}/{{sample}}/paired_fasta/{{sample}}.fasta",
-        cnb_model = cnb_model,
-        nrc_model = nc_model,
-        fasta_spec = fasta_spec,
-        bed = bed_file,
     output:
         result = f"{outdir}/{{sample}}/{{sample}}.{{model}}.tsv",
     params:
-        model_name = lambda w: w.model,
         sample = lambda w: w.sample,
-    run:
-        from Bio import AlignIO
-        from pickle import load
-
-        sequences = None
-        
-        if params.model_name == "nc":
-            model = load(open(input.nrc_model, "rb"))        
-
-        if params.model_name == "cnb":
-            model = load(open(input.cnb_model, "rb"))
-
-        if params.model_name == "pa":
-            model = load(open(input.pa_model, "rb"))
-        
-        if params.model_name == "ensemble":
-            model = load(open(input.ensemble_model, "rb"))
-        
-        species_classes = model.classes_
-
-        try:
-            sequences = AlignIO.read(open(input.fasta), "fasta")
-        # No read
-        except Exception as e:
-            print(e)
-            classes = "\t".join(species_classes)
-            output_string = f"sample\tspecies\tread_id\tf_pair_diff\t{classes}\n"
-            output_string += f"{params.sample}\tNA\tNA\tNA\tNA\tNA\tNA\tNA\tNA\n"
-            open(output.result, "w+").write(output_string)
-            
-        if not sequences is None:
-            
-            if params.model_name in ["cnb", "nc", "pa", "ensemble"]:
-                result_df = model.get_full_result(sequences)
-                result_df["sample"] = params.sample
-                result_df.to_csv(output.result, sep="\t", index = False)
-            
-            else:
-                raise ValueError("Not a supported model")
+        model_file = lambda w: models_file_loc.get(w.model),
+    shell:
+        "ngs-pl run-model --output {output.result} --model {params.model_file} --sample {params.sample} {input.fasta}"
 
 rule bam_to_mated_reads_fasta:
     input:
         bam = f"{outdir}/{{sample}}/nomerge/{{sample}}.bam",
         bai = f"{outdir}/{{sample}}/nomerge/{{sample}}.bam.bai",
         bed = bed_file,
-        ref = Reference,
+        # ref = Reference,
     output:
         fasta = f"{outdir}/{{sample}}/paired_fasta/{{sample}}.fasta"
-    run:
-        import pysam
-        import pandas as pd
-        from Bio.Seq import Seq
-        from Bio.SeqRecord import SeqRecord
-        from Bio import SeqIO
-
-        # follow bed format start = 0-based, end = 1-based
-        # start is exclusive, end is inclusive
-        def get_paired_merged_query_sequence(start, end, read1, read2):
-            result = []
-            reads = [read1, read2]
-            reads_pos_base = [{
-                rpos: (r_1_2.query_sequence[qpos], r_1_2.query_qualities[qpos])
-                    for qpos, rpos in r_1_2.get_aligned_pairs(matches_only=True)} for r_1_2 in reads]
-            
-            for read_i, read in enumerate(reads):
-                missing_rpos = set(range(read.reference_start, read.reference_end)) - set(reads_pos_base[read_i].keys())
-                for pos in missing_rpos:
-                    reads_pos_base[read_i][pos] = ("-", 1) 
-                
-            for pos in range(start, end):
-                temp = ('', 0)
-                if pos in reads_pos_base[0].keys():
-                    temp = reads_pos_base[0][pos]
-                if pos in reads_pos_base[1].keys():
-                    if reads_pos_base[1][pos][1] > temp[1]:
-                        temp = reads_pos_base[1][pos]
-                if temp[0] == '':
-                    temp = ('N', 0)
-                result.append(temp[0])
-            return(''.join(result).upper())
-
-        bamfile = pysam.AlignmentFile(input.bam, "rb")
-        bed = pd.read_csv(input.bed, sep="\t", header=None)
-        roi_start = bed.iloc[0,1]
-        roi_end = bed.iloc[0,2]
-        read_names = []
-        results = []
-        for read in bamfile.fetch():
-            # Check if read is paired
-            if not read.is_paired:
-                continue
-            # Already processed
-            if read.query_name in read_names:
-                continue
-            
-            read_names.append(read.query_name)
-            mate = bamfile.mate(read)
-            results.append(
-                SeqRecord(
-                    Seq(
-                        get_paired_merged_query_sequence(roi_start, roi_end, read, mate)
-                    ),
-                    id=read.query_name,
-                    description=""
-                )
-            )
-        SeqIO.write(results, output.fasta, "fasta")
+    shell:
+        "ngs-pl bam2matedfasta --fasta {output.fasta} --bed {input.bed} --bam {input.bam}"
 
 
 # https://jbloomlab.github.io/dms_tools2/index.html
