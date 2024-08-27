@@ -3,11 +3,14 @@ import os
 NGSENV_BASEDIR = os.environ['NGSENV_BASEDIR']
 REFS_DIR = os.path.join(NGSENV_BASEDIR, 'refs')
 REFS_MODEL_DIR = os.path.join(REFS_DIR, 'model')
-
+BEDFILE = config.get("bedfile", f"{REFS_MODEL_DIR}/mit_cons.bed")
 if not os.path.exists(REFS_MODEL_DIR):
     os.makedirs(REFS_MODEL_DIR)
 
-MIT_SEQS = config.get("MIT_SEQS", "mit_all.fasta") # to replace
+MIT_SEQS = config.get("MIT_SEQS", f"{REFS_DIR}/mit_all.fasta") # to replace
+print(MIT_SEQS)
+print(BEDFILE)
+
 
 rule all:
     input:
@@ -15,7 +18,7 @@ rule all:
         #     'nc', 'cnb', 'pa', 'ensemble'
         # ]],
         f"{REFS_DIR}/mit_cons.fasta",
-        f"{REFS_DIR}/mit_cons_single_primersim.tsv",
+        BEDFILE,
         f"{REFS_MODEL_DIR}/mit_spec_all.fasta",
         f"{REFS_MODEL_DIR}/nc.pickle",
         f"{REFS_MODEL_DIR}/cnb.pickle",
@@ -47,7 +50,7 @@ rule extract_all_hypothetical_products:
     output:
         f"{REFS_MODEL_DIR}/mit_spec_all.fasta",
         f"{REFS_MODEL_DIR}/ordered_spec.txt",
-        f"{REFS_MODEL_DIR}/mit_cons.bed",
+        BEDFILE,
     run:
         from seqpy.core.bioio import load, save, multisequence, biosequence
         import pandas as pd
@@ -122,8 +125,8 @@ rule consensus_all_mit:
 
 rule muscle_align_mit:
     input:
-        f"{REFS_DIR}/{MIT_SEQS}"
+        f"{MIT_SEQS}"
     output:
         f"{REFS_DIR}/mit_all.muscle.fasta"
     shell:
-        "muscle -super5 {input} -out {output}"
+        "muscle -super5 {input} -output {output}"

@@ -1,4 +1,4 @@
-bedfile: refs/Mito_sync_cons05.bed
+bedfile: refs/model/mit_cons.bed
 reference: refs/mit_cons.fasta
 prim_fw: refs/microhap_pr_fwd.min_overlap.fasta
 prim_rv: refs/microhap_pr_rv.min_overlap.fasta

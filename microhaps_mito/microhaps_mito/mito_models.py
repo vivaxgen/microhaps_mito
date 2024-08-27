@@ -56,11 +56,13 @@ class MitoNC(NearestCentroid):
         self.spec_min_f_pair_diff = 0
     
     def transform_kmer_count(self, sequences, k = 3):
-        all_kmers = {q for p in [["".join(sequence[i:i+k]) for i in range(len(sequence) - k + 1)] for sequence in sequences] for q in p}
+        trimmed_sequences = [sequence.seq.replace("N", "").replace("-", "") for sequence in sequences]
+        all_kmers = {q for p in [["".join(sequence[i:i+k]) for i in range(len(sequence) - k + 1)]
+                                 for sequence in trimmed_sequences] for q in p}
         results = []
         kmer = sorted(all_kmers)
 
-        for sequence in sequences:
+        for sequence in trimmed_sequences:
             kmer_count = [0]*len(kmer)
             for i in range(len(sequence) - k + 1):
                 kmer_count[kmer.index("".join(sequence[i:i+k]))] += 1
@@ -69,7 +71,8 @@ class MitoNC(NearestCentroid):
     
     def transform_kmer_to_list(self, sequences, kmers=list()):
         results = []
-        for sequence in sequences:
+        trimmed_sequences = [sequence.seq.upper().replace("N", "").replace("-", "") for sequence in sequences]
+        for sequence in trimmed_sequences:
             kmer_count = [sequence.count(kmer) for kmer in kmers]
             results.append(kmer_count)
         return results
@@ -94,7 +97,7 @@ class MitoNC(NearestCentroid):
         if self.roi_end == -1:
             self.roi_end = len(X[0])
         filtered_spec = X[:, self.roi_start:self.roi_end]
-        filtered_spec_kmerised, kmer = self.transform_kmer_count([a.seq.upper() for a in filtered_spec], k = self.k)
+        filtered_spec_kmerised, kmer = self.transform_kmer_count(filtered_spec, k = self.k)
         self.kmer = kmer
         if y is None:
             y = pd.Series([a.id for a in filtered_spec])
@@ -260,34 +263,3 @@ class cascadingSpeciationModel:
                 subset_result.rename(columns = {"species": f"{_class} subspecies", "f_pair_diff": f"{_class}_f_pair_diff"}, inplace = True)
                 result = pd.merge(result, subset_result, how = "left", on = "read_id")
         return result
-
-        # subset the result to those that need submodels
-        
-        # get result with submodels
-
-
-    # {"Plasmodium": model1, "Plasmodium Ovale": model2} --> while Result in dict.keys()
-
-
-        # # Train the primary model
-        # current_model = self.model
-        # current_model.fit2(X, y[:,0])
-        # self.cascade_models = {0: self.model}
-        # to_diff = np.unique([yi[0:y.shape[1]-1] for yi in y if yi[y.shape[1]-1] != "" ], axis = 0)
-        # spp_i = y.shape[1]-1
-        # if to_diff.shape[1] < 1:
-        #     raise ValueError("No submodels needed")
-        # else:
-        #     for sub_diff in to_diff:
-        #         filtered_y = [n[spp_i] for n in y[:,0:spp_i+1] if n[spp_i]!= "" and (n[0:spp_i] == sub_diff).all()]
-        #         filtered_y_index = [i for i, v in enumerate(y[:,spp_i]) if v in filtered_y]
-        #         filtered_X = X[filtered_y_index]
-        #         model = MitoEnsemble(models = self.models)
-        #         model.fit2(filtered_X, filtered_y)
-        #         self.cascade_models.append({"species": sub_diff, "model": model})
-
-
-# "pk", "pv", "pv" "pmo","pmv", "pmm", "pva","pvb"
-# result = result = {"read_id": [1,2,3,4,5],
-#                    "species": ["pv", "pmo", "pmv", "pk", "pf"],}
-# pd.DataFrame.from_dict(result, orient = "columns")
