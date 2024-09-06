@@ -1,18 +1,30 @@
 bedfile: refs/Mito_sync_cons05.bed
 reference: refs/Mito_sync_cons05.fasta
-prim_fw: refs/microhap_pr_fwd.min_overlap.fasta
-prim_rv: refs/microhap_pr_rv.min_overlap.fasta
-similarity_comparison: refs/ORIGINAL_Spec2-1638-1893.fasta
+primer_set:
+  set1:
+    forward: refs/MIT_species1_fwd.fasta
+    reverse: refs/MIT_species1_rv.fasta
+  set2:
+    forward: refs/MIT_species2_fwd.fasta
+    reverse: refs/MIT_species2_rv.fasta
+primer_trim_set:
+  forward: refs/microhaps_pr_fwd.fasta
+  reverse: refs/microhaps_pr_rv.fasta
+
 filtering_criteria: {
     "conservative": {
         "cnb": ">= 3.5",
         "nc": " >= 0.2",
         "align_score": ">= 15",
+        "pa": ">= 1",
+        "ensemble": ">= 1"
     },
     "sensitive": {
         "cnb": "> 0.5",
         "nc": " > 0",
         "align_score": "> 0",
+        "pa": "> 0",
+        "ensemble": "> 0"
     }
   }
 min_reads_consideration: {

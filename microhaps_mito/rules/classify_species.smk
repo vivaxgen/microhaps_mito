@@ -1,5 +1,6 @@
 # get the vivaxGEN ngs-pipeline base directory
 import os
+import pandas as pd
 
 NGS_PIPELINE_BASE = os.environ["NGS_PIPELINE_BASE"]
 NGSENV_BASEDIR = os.environ['NGSENV_BASEDIR']
@@ -15,7 +16,7 @@ Reference = NGSENV_BASEDIR + '/' + config["reference"]
 prim_fw = NGSENV_BASEDIR + '/' + config["prim_fw"]
 prim_rv = NGSENV_BASEDIR + '/' + config["prim_rv"]
 model_to_run = config.get("model", ["cnb", "nc", "pa", "ensemble"])
-fasta_spec = NGSENV_BASEDIR + '/' + config["similarity_comparison"]
+
 cnb_model = NGSENV_BASEDIR + '/' + "refs/model/cnb.pickle"
 nc_model = NGSENV_BASEDIR + '/' + "refs/model/nc.pickle"
 pa_model = NGSENV_BASEDIR + '/' + "refs/model/pa.pickle"

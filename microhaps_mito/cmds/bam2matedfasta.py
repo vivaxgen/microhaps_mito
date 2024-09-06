@@ -4,12 +4,16 @@ import pandas as pd
 from Bio.Seq import Seq
 from Bio.SeqRecord import SeqRecord
 from Bio import SeqIO
+import os
 
 def init_argparser():
     p = snakeutils.init_argparser("Extracts the merged query sequence of paired reads from a BAM file")
     p.add_argument("--bam", help="Input BAM file")
     p.add_argument("--bed", help="BED file with the region of interest")
     p.add_argument("--fasta", help="Output FASTA file")
+    p.add_argument("--split", action='store_true', help=("if set, will output the merged pairs into different fasta files "
+                    "with the amplicon name based on 4th column of the bed file (or chrom_start_end) appended to the fasta filename")
+                    )
     return p
 
 # follow bed format start = 0-based, end = 1-based
@@ -41,32 +45,43 @@ def get_paired_merged_query_sequence(start, end, read1, read2):
 def main(args):
     bamfile = pysam.AlignmentFile(args.bam, "rb")
     bed = pd.read_csv(args.bed, sep="\t", header=None)
-    chrom = bed.iloc[0,0]
-    roi_start = bed.iloc[0,1]
-    roi_end = bed.iloc[0,2]
-    read_names = []
-    results = []
-    for read in bamfile.fetch(chrom, roi_start, roi_end):
-        # Check if read is paired
-        if not read.is_paired:
-            continue
-        # Already processed
-        if read.query_name in read_names:
-            continue
-        
-        read_names.append(read.query_name)
-        try:
-            mate = bamfile.mate(read)
-        except:
-            cerr(f"Read {read.query_name} does not have a mate")
-            continue
-        results.append(
-            SeqRecord(
-                Seq(
-                    get_paired_merged_query_sequence(roi_start, roi_end, read, mate)
-                ),
-                id=read.query_name,
-                description=""
+    all_result = []
+
+    for i in range(len(bed)):
+        chrom = bed.iloc[i,0]
+        roi_start = bed.iloc[i,1]
+        roi_end = bed.iloc[i,2]
+        if bed.shape[1] > 3:
+            primer_name = bed.iloc[i,3]
+        else:
+            primer_name = f"{chrom}_{roi_start}_{roi_end}"
+        read_names = []
+        results = []
+        for read in bamfile.fetch(chrom, roi_start, roi_end):
+            # Check if read is paired
+            if not read.is_paired:
+                continue
+            # Already processed
+            if read.query_name in read_names:
+                continue
+            
+            read_names.append(read.query_name)
+            try:
+                mate = bamfile.mate(read)
+            except:
+                cerr(f"Read {read.query_name} does not have a mate")
+                continue
+            results.append(
+                SeqRecord(
+                    Seq(
+                        get_paired_merged_query_sequence(roi_start, roi_end, read, mate)
+                    ),
+                    id=read.query_name,
+                    description=""
+                )
             )
-        )
-    SeqIO.write(results, args.fasta, "fasta")
+            if args.split:
+                SeqIO.write(results, f"{args.fasta.replace(".fasta", f"_{primer_name}.fasta")}", "fasta")
+            all_result.extend(results)
+    if not args.split:    
+        SeqIO.write(all_result, args.fasta, "fasta")
