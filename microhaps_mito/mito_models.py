@@ -108,8 +108,7 @@ class MitoNC(NearestCentroid):
 class MitoPA:
     def __init__(self, roi_start=0, roi_end=-1):
         self.consensus = []
-        self.species = []
-        self.classes_ = []
+        self.classes_ = np.array([])
         self.roi_start = roi_start
         self.roi_end = roi_end
         self.spec_min_f_pair_diff = 0
@@ -145,10 +144,8 @@ class MitoPA:
             mot = Motif('ACGTN-', subspec.alignment)
             cons = mot.degenerate_consensus
             self.consensus.append(cons)
-            self.classes_.append(uy)
-            self.species.append(uy)
+            self.classes_ = np.append(self.classes_, uy)
 
-        self.classes_ = np.array(self.classes_)
         self.spec_f_pair_diff = self.get_full_result(X)["f_pair_diff"]
         self.spec_min_f_pair_diff = self.spec_f_pair_diff.min()
 
@@ -160,7 +157,7 @@ class MitoEnsemble:
         self.roi_start = roi_start
         self.roi_end = roi_end
         self.spec_min_f_pair_diff = 0
-        self.classes_ = models[0].classes_ if len(models) > 0 else []
+        self.classes_ = models[0].classes_ if len(models) > 0 else np.array([])
     
     def fit2(self, X, y = None):
         if y is None:
@@ -184,10 +181,10 @@ class MitoEnsemble:
                 raise ValueError("Species classes do not match")
             if model.__class__.__name__ == "MitoNC":
                 weighted = result_df[self.classes_]
-                weighted = 1 - (weighted - weighted.min())/(weighted.max() - weighted.min())
+                weighted = weighted.apply(lambda row: 1- ((row - row.min())/(row.max()-row.min())), axis=1)
             else:
                 weighted = result_df[self.classes_]
-                weighted = (weighted - weighted.min())/(weighted.max() - weighted.min())
+                weighted = weighted.apply(lambda row: ((row - row.min())/(row.max()-row.min())), axis=1)
             if scores is None:
                 scores = weighted
             else:

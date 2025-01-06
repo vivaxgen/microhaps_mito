@@ -82,6 +82,6 @@ def main(args):
             )
             if args.split:
                 SeqIO.write(results, f"{args.fasta.replace(".fasta", f"_{primer_name}.fasta")}", "fasta")
-            all_result.extend(results)
+        all_result.extend(results)
     if not args.split:    
         SeqIO.write(all_result, args.fasta, "fasta")

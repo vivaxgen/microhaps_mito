@@ -16,7 +16,10 @@ def main(args):
     print(args.infile[0])
     print(args.model)
     model = load(open(args.model, 'rb'))
-    species_classes = sum([(a.tolist()) for a in model.classes_.values()], [])
+    if model.__class__.__name__ == "cascadingSpeciationModel":
+        species_classes = sum([], [(a.tolist()) for a in model.classes_.values()])
+    else:
+        species_classes = model.classes_.tolist()
 
     sequences = None
     # import ipdb; ipdb.set_trace()

@@ -5,7 +5,6 @@ import pandas as pd
 from microhaps_mito.mito_models import MitoCNB, MitoNC, MitoPA, MitoEnsemble, cascadingSpeciationModel
 from pickle import dump
 import numpy as np
-from itertools import zip_longest
 
 def init_argparser():
     p = arg_parser('Generate model for Plasmodium species classification based on mitochondrial DNA')
